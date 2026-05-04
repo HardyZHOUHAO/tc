@@ -340,71 +340,93 @@ static String escapeJson(String s) {
         return list;
     }
     
-    // ==================== CNN RSS ====================
     static List<NewsItem> fetchCNN() throws Exception {
-        List<NewsItem> list = new ArrayList<>();
-        Thread.sleep(3000);
-        Document doc = Jsoup.connect("http://rss.cnn.com/rss/edition_technology.rss")
-            .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
-            .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
-            .timeout(10000).ignoreContentType(true).get();
-        
-        for(Element item : doc.select("item")) {
-            String title = item.select("title").first().text();
-            String link = item.select("link").first().text();
-            String summary=""; 
-            Element desc=item.select("description").first();
-            if(desc!=null) { 
-                summary=Jsoup.parse(desc.text()).text(); 
-                if(summary.length()>100) summary=summary.substring(0,97)+"..."; 
-            }
-            
-            String img = "";
-            Element mediaContent = item.select("media\\:content").first();
-            if(mediaContent != null) img = mediaContent.attr("url");
-            if(img.isEmpty()) {
-                Element enclosure = item.select("enclosure").first();
-                if(enclosure != null) img = enclosure.attr("url");
-            }
-            if(img.isEmpty() && desc != null) {
-                Element ie = Jsoup.parse(desc.text()).select("img").first();
-                if(ie != null) img = ie.absUrl("src");
-            }
-            
-            list.add(new NewsItem(title,summary,link,img,"CNN"));
+    List<NewsItem> list = new ArrayList<>();
+    Thread.sleep(3000);
+    Document doc = Jsoup.connect("http://rss.cnn.com/rss/edition_technology.rss")
+        .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+        .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+        .timeout(10000).ignoreContentType(true).get();
+    
+    for (Element item : doc.select("item")) {
+        String title = item.select("title").first().text();
+        String link = item.select("link").first().text();
+        String summary = "";
+        Element desc = item.select("description").first();
+        if (desc != null) {
+            summary = Jsoup.parse(desc.text()).text();
+            if (summary.length() > 100) summary = summary.substring(0, 97) + "...";
         }
-        return list;
+        
+        // 获取图片 - 修复冒号问题
+        String img = "";
+        try {
+            // 方法1：遍历所有元素查找 media:content
+            for (Element el : item.getAllElements()) {
+                if (el.tagName().equals("media:content")) {
+                    img = el.attr("url");
+                    break;
+                }
+            }
+            // 方法2：尝试 enclosure
+            if (img.isEmpty()) {
+                Element enclosure = item.select("enclosure").first();
+                if (enclosure != null) img = enclosure.attr("url");
+            }
+            // 方法3：从 description 里找图片
+            if (img.isEmpty() && desc != null) {
+                Element ie = Jsoup.parse(desc.text()).select("img").first();
+                if (ie != null) img = ie.absUrl("src");
+            }
+        } catch (Exception e) {
+            // 忽略图片获取失败
+        }
+        
+        list.add(new NewsItem(title, summary, link, img, "CNN"));
+    }
+    return list;
+}
     }
     
-    // ==================== BBC RSS ====================
-    static List<NewsItem> fetchBBC() throws Exception {
-        List<NewsItem> list = new ArrayList<>();
-        Thread.sleep(3000);
-        Document doc = Jsoup.connect("https://feeds.bbci.co.uk/news/technology/rss.xml")
-            .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
-            .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
-            .timeout(10000).ignoreContentType(true).get();
-        
-        for(Element item : doc.select("item")) {
-            String title = item.select("title").first().text();
-            String link = item.select("link").first().text();
-            String summary=""; 
-            Element desc=item.select("description").first();
-            if(desc!=null) { 
-                summary=Jsoup.parse(desc.text()).text(); 
-                if(summary.length()>100) summary=summary.substring(0,97)+"..."; 
-            }
-            
-            String img = "";
-            Element thumbnail = item.select("media\\:thumbnail").first();
-            if(thumbnail != null) img = thumbnail.attr("url");
-            if(img.isEmpty() && desc != null) {
-                Element ie = Jsoup.parse(desc.text()).select("img").first();
-                if(ie != null) img = ie.absUrl("src");
-            }
-            
-            list.add(new NewsItem(title,summary,link,img,"BBC News"));
+  static List<NewsItem> fetchBBC() throws Exception {
+    List<NewsItem> list = new ArrayList<>();
+    Thread.sleep(3000);
+    Document doc = Jsoup.connect("https://feeds.bbci.co.uk/news/technology/rss.xml")
+        .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+        .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+        .timeout(10000).ignoreContentType(true).get();
+    
+    for (Element item : doc.select("item")) {
+        String title = item.select("title").first().text();
+        String link = item.select("link").first().text();
+        String summary = "";
+        Element desc = item.select("description").first();
+        if (desc != null) {
+            summary = Jsoup.parse(desc.text()).text();
+            if (summary.length() > 100) summary = summary.substring(0, 97) + "...";
         }
-        return list;
+        
+        // 获取图片 - 修复冒号问题
+        String img = "";
+        try {
+            // 遍历所有元素查找 media:thumbnail
+            for (Element el : item.getAllElements()) {
+                if (el.tagName().equals("media:thumbnail")) {
+                    img = el.attr("url");
+                    break;
+                }
+            }
+            // 从 description 里找图片
+            if (img.isEmpty() && desc != null) {
+                Element ie = Jsoup.parse(desc.text()).select("img").first();
+                if (ie != null) img = ie.absUrl("src");
+            }
+        } catch (Exception e) {
+            // 忽略图片获取失败
+        }
+        
+        list.add(new NewsItem(title, summary, link, img, "BBC News"));
     }
+    return list;
+}
 }

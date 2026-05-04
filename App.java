@@ -24,9 +24,9 @@ public class App {
     }
     
     static String[] comments = {
-        "今天的科技新闻真有意思，{keyword} 又有新进展！",
-        "这条关于 {keyword} 的新闻，感觉未来已来。",
-        "{keyword} 这个话题最近很火，值得关注。"
+        "Today's tech news is interesting, {keyword} has new progress!",
+        "This news about {keyword} feels like the future is here.",
+        "{keyword} is a hot topic lately, worth paying attention to."
     };
     
     public static void main(String[] args) throws Exception {
@@ -43,10 +43,10 @@ public class App {
                 StringBuilder html = new StringBuilder();
                 html.append("<!DOCTYPE html><html><head><meta charset='UTF-8'>");
                 html.append("<meta name='referrer' content='no-referrer'>");
-                html.append("<title>TechNews 即时新闻</title>");
+                html.append("<title>TechNews</title>");
                 html.append("<style>");
                 html.append("*{margin:0;padding:0;box-sizing:border-box;}");
-                html.append("body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;max-width:900px;margin:0 auto;padding:20px;}");
+                html.append("body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;max-width:1000px;margin:0 auto;padding:20px;}");
                 html.append(".header{text-align:center;padding:30px 0;border-bottom:3px solid #2196F3;margin-bottom:20px;}");
                 html.append(".header h1{font-size:2em;color:#1565C0;}");
                 html.append(".header p{color:#666;margin-top:5px;}");
@@ -64,12 +64,12 @@ public class App {
                 html.append(".news-content h3 a:hover{text-decoration:underline;}");
                 html.append(".summary{color:#555;margin:8px 0;line-height:1.5;}");
                 html.append(".source{display:inline-block;background:#e3f2fd;color:#1565C0;padding:3px 10px;border-radius:12px;font-size:0.85em;margin-top:5px;}");
-                html.append(".spell-box{margin-top:40px;padding:25px;background:#fff;border-radius:10px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.1);}");
-                html.append(".spell-box h3{margin-bottom:15px;color:#333;}");
-                html.append(".spell-box input{padding:10px 15px;width:280px;font-size:1em;border:2px solid #ddd;border-radius:5px;outline:none;}");
-                html.append(".spell-box input:focus{border-color:#2196F3;}");
-                html.append(".spell-box button{padding:10px 20px;background:#2196F3;color:#fff;border:none;border-radius:5px;cursor:pointer;margin-left:10px;font-size:1em;}");
-                html.append(".spell-box button:hover{background:#1976D2;}");
+                html.append(".dictionary-box{margin-top:40px;padding:25px;background:#fff;border-radius:10px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.1);}");
+                html.append(".dictionary-box h3{margin-bottom:15px;color:#333;}");
+                html.append(".dictionary-box input{padding:10px 15px;width:280px;font-size:1em;border:2px solid #ddd;border-radius:5px;outline:none;}");
+                html.append(".dictionary-box input:focus{border-color:#2196F3;}");
+                html.append(".dictionary-box button{padding:10px 20px;background:#2196F3;color:#fff;border:none;border-radius:5px;cursor:pointer;margin-left:10px;font-size:1em;}");
+                html.append(".dictionary-box button:hover{background:#1976D2;}");
                 html.append("#result{margin-top:20px;font-size:1em;line-height:1.6;text-align:left;max-width:500px;margin-left:auto;margin-right:auto;}");
                 html.append(".result-card{background:#f8f9fa;border-radius:10px;padding:15px;margin-top:10px;}");
                 html.append(".part-of-speech{display:inline-block;background:#4CAF50;color:white;padding:3px 10px;border-radius:15px;font-size:0.85em;margin:5px 5px 0 0;}");
@@ -80,11 +80,11 @@ public class App {
                 html.append("@media(max-width:600px){.news-card{flex-direction:column;}.img-container{width:100%;height:200px;}}");
                 html.append("</style></head><body>");
                 
-                html.append("<div class='header'><h1>📰 TechNews 即时新闻</h1>");
-                html.append("<p>Guardian · CNN · BBC 实时爬取</p></div>");
+                html.append("<div class='header'><h1>📰 TechNews</h1>");
+                html.append("<p>Guardian · CNN · BBC Real-time News</p></div>");
                 
                 html.append("<div style='text-align:center;margin-bottom:15px;'>");
-                html.append("<button id='musicBtn' onclick='toggleMusic()' style='background:#4CAF50;color:white;border:none;padding:8px 20px;border-radius:20px;cursor:pointer;font-size:14px;'>🎵 播放音乐</button>");
+                html.append("<button id='musicBtn' onclick='toggleMusic()' style='background:#4CAF50;color:white;border:none;padding:8px 20px;border-radius:20px;cursor:pointer;font-size:14px;'>🎵 Play Music</button>");
                 html.append("</div>");
                 
                 String comment = generateComment(news);
@@ -99,7 +99,7 @@ public class App {
                     } else {
                         html.append("<div class='img-container' style='background:#e0e0e0;display:flex;")
                             .append("align-items:center;justify-content:center;height:150px;'>")
-                            .append("<span style='color:#999;'>暂无图片</span></div>");
+                            .append("<span style='color:#999;'>No Image</span></div>");
                     }
                     html.append("<div class='news-content'>");
                     html.append("<h3><a href='").append(item.link).append("' target='_blank'>")
@@ -109,37 +109,37 @@ public class App {
                     html.append("</div></div>");
                 }
                 
-                html.append("<div class='spell-box'>");
-                html.append("<h3>📝 线上词典查询</h3>");
-                html.append("<p style='color:#666;margin-bottom:15px;font-size:0.9em;'>输入英文单词，查询词性和定义</p>");
-                html.append("<input id='word' placeholder='输入英文单词，例如：algorithm' autofocus>");
-                html.append("<button onclick='checkDictionary()'>查询词典</button>");
+                html.append("<div class='dictionary-box'>");
+                html.append("<h3>📝 Online Dictionary</h3>");
+                html.append("<p style='color:#666;margin-bottom:15px;font-size:0.9em;'>Enter an English word to check part of speech and definition</p>");
+                html.append("<input id='word' placeholder='Enter a word, e.g. algorithm' autofocus>");
+                html.append("<button onclick='checkDictionary()'>Search</button>");
                 html.append("<div id='result'></div>");
                 html.append("</div>");
                 
-                html.append("<div class='footer'><p>🔄 数据即时从 Guardian API · CNN RSS · BBC RSS 爬取</p></div>");
+                html.append("<div class='footer'><p>🔄 Data from Guardian API · CNN RSS · BBC RSS</p></div>");
                 
                 html.append("<script>");
                 html.append("var audio = null;");
                 html.append("function toggleMusic(){");
                 html.append("if(!audio){");
-                html.append("audio = new Audio('https://www.qtings.com/uploads/tracks/2124019576_786842529_1597766027.mp3');");
+                html.append("audio = new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3');");
                 html.append("audio.loop = true;");
                 html.append("audio.play();");
-                html.append("document.getElementById('musicBtn').innerHTML = '⏸️ 暂停音乐';");
+                html.append("document.getElementById('musicBtn').innerHTML = '⏸️ Pause Music';");
                 html.append("} else if(audio.paused){");
                 html.append("audio.play();");
-                html.append("document.getElementById('musicBtn').innerHTML = '⏸️ 暂停音乐';");
+                html.append("document.getElementById('musicBtn').innerHTML = '⏸️ Pause Music';");
                 html.append("} else {");
                 html.append("audio.pause();");
-                html.append("document.getElementById('musicBtn').innerHTML = '🎵 播放音乐';");
+                html.append("document.getElementById('musicBtn').innerHTML = '🎵 Play Music';");
                 html.append("}");
                 html.append("}");
                 html.append("async function checkDictionary(){");
                 html.append("var word=document.getElementById('word').value.trim().toLowerCase();");
                 html.append("var resultDiv=document.getElementById('result');");
-                html.append("if(!word){resultDiv.innerHTML='<div class=\"result-card\">⚠️ 请输入单词</div>';return;}");
-                html.append("resultDiv.innerHTML='<div class=\"loading\">📖 查询中...</div>';");
+                html.append("if(!word){resultDiv.innerHTML='<div class=\"result-card\">⚠️ Please enter a word</div>';return;}");
+                html.append("resultDiv.innerHTML='<div class=\"loading\">📖 Searching...</div>';");
                 html.append("try{");
                 html.append("var response=await fetch('/dict?word='+encodeURIComponent(word));");
                 html.append("var data=await response.json();");
@@ -156,7 +156,7 @@ public class App {
                 html.append("});");
                 html.append("}");
                 html.append("resultDiv.innerHTML=html+'</div>';");
-                html.append("}catch(e){resultDiv.innerHTML='<div class=\"result-card\">❌ 查询失败</div>';}");
+                html.append("}catch(e){resultDiv.innerHTML='<div class=\"result-card\">❌ Search failed</div>';}");
                 html.append("}");
                 html.append("document.getElementById('word').addEventListener('keypress',function(e){if(e.key==='Enter')checkDictionary();});");
                 html.append("</script>");
@@ -176,7 +176,7 @@ public class App {
             }
         });
         
-        // 词典 API 端点
+        // Dictionary API endpoint
         server.createContext("/dict", exchange -> {
             try {
                 String query = exchange.getRequestURI().getQuery();
@@ -186,7 +186,7 @@ public class App {
                 }
                 
                 if (word.isEmpty()) {
-                    String response = "{\"error\":\"请输入单词\"}";
+                    String response = "{\"error\":\"Please enter a word\"}";
                     exchange.getResponseHeaders().set("Content-Type", "application/json");
                     exchange.sendResponseHeaders(400, response.length());
                     exchange.getResponseBody().write(response.getBytes());
@@ -203,7 +203,7 @@ public class App {
                 
                 int responseCode = conn.getResponseCode();
                 if (responseCode == 404) {
-                    String response = "{\"error\":\"找不到单词，请检查拼写\"}";
+                    String response = "{\"error\":\"Word not found, please check spelling\"}";
                     exchange.getResponseHeaders().set("Content-Type", "application/json");
                     exchange.sendResponseHeaders(404, response.length());
                     exchange.getResponseBody().write(response.getBytes());
@@ -223,7 +223,7 @@ public class App {
                 exchange.getResponseBody().write(formattedData.getBytes("UTF-8"));
                 exchange.close();
             } catch (Exception e) {
-                String response = "{\"error\":\"服务器错误\"}";
+                String response = "{\"error\":\"Server error\"}";
                 exchange.getResponseHeaders().set("Content-Type", "application/json");
                 exchange.sendResponseHeaders(500, response.length());
                 exchange.getResponseBody().write(response.getBytes());
@@ -232,21 +232,21 @@ public class App {
         });
         
         server.start();
-        System.out.println("TechNews 服务器已启动，端口: " + port);
+        System.out.println("TechNews server started on port: " + port);
     }
     
     static String generateComment(List<NewsItem> news) {
-        if(news.isEmpty()) return "暂无新闻数据。";
+        if(news.isEmpty()) return "No news today.";
         NewsItem item = news.get(new Random().nextInt(news.size()));
         String[] words = item.title.split(" ");
-        String kw = words.length>2 ? words[words.length/2] : "科技";
+        String kw = words.length>2 ? words[words.length/2] : "technology";
         return comments[new Random().nextInt(comments.length)].replace("{keyword}", kw);
     }
     
     static String parseDictionaryJson(String jsonStr, String word) {
         try {
             JsonArray arr = JsonParser.parseString(jsonStr).getAsJsonArray();
-            if (arr.size() == 0) return "{\"error\":\"未找到定义\"}";
+            if (arr.size() == 0) return "{\"error\":\"No definition found\"}";
             
             JsonObject firstEntry = arr.get(0).getAsJsonObject();
             StringBuilder result = new StringBuilder();
@@ -283,7 +283,7 @@ public class App {
             result.append("]}");
             return result.toString();
         } catch (Exception e) {
-            return "{\"error\":\"解析失败\"}";
+            return "{\"error\":\"Parse failed\"}";
         }
     }
     

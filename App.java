@@ -101,21 +101,22 @@ html.append("</div>");
                     html.append("</div></div>");
                 }
                 
-                html.append("<div class='spell-box'>");
-                html.append("<h3>📝 线上拼字检查</h3>");
-                html.append("<input id='word' placeholder='输入英文单字' autofocus>");
-                html.append("<button onclick=\"checkSpelling()\">检查拼字</button>");
-                html.append("<p id='result'></p>");
-                html.append("</div>");
+               html.append("<div class='spell-box'>");
+html.append("<h3>📝 线上词典查询</h3>");
+html.append("<p style='color:#666;margin-bottom:15px;font-size:0.9em;'>输入英文单词，查询词性和定义</p>");
+html.append("<input id='word' placeholder='输入英文单词，例如：algorithm' autofocus>");
+html.append("<button onclick=\"checkDictionary()\">查询词典</button>");
+html.append("<div id='result'></div>");
+html.append("</div>");
                 
                 html.append("<div class='footer'><p>🔄 数据即时从 Guardian API · CNN RSS · BBC RSS 爬取</p></div>");
                 
-                html.append("<script>");
-                // 音乐播放功能
+               html.append("<script>");
+// 音乐播放
 html.append("var audio = null;");
 html.append("function toggleMusic(){");
 html.append("if(!audio){");
-html.append("audio = new Audio('https://www.qtings.com/uploads/tracks/2124019576_786842529_1597766027.mp3');");  // 替换成你的音乐链接
+html.append("audio = new Audio('https://www.qtings.com/uploads/tracks/2124019576_786842529_1597766027.mp3');");
 html.append("audio.loop = true;");
 html.append("audio.play();");
 html.append("document.getElementById('musicBtn').innerHTML = '⏸️ 暂停音乐';");
@@ -127,20 +128,35 @@ html.append("audio.pause();");
 html.append("document.getElementById('musicBtn').innerHTML = '🎵 播放音乐';");
 html.append("}");
 html.append("}");
-                html.append("function checkSpelling(){");
-                html.append("var word=document.getElementById('word').value.trim();");
-                html.append("if(!word){document.getElementById('result').innerHTML='请输入单词';return;}");
-                html.append("fetch('https://api.datamuse.com/words?sp='+word+'&max=1')");
-                html.append(".then(r=>r.json())");
-                html.append(".then(d=>{");
-                html.append("var r=document.getElementById('result');");
-                html.append("if(d.length&&d[0].word==word.toLowerCase())r.innerHTML='✅ <b>'+word+'</b> 拼写正确！';");
-                html.append("else if(d.length)r.innerHTML='❌ 找不到 <b>'+word+'</b>，您是否要找：<b>'+d[0].word+'</b>？';");
-                html.append("else r.innerHTML='❌ 找不到 <b>'+word+'</b>';");
-                html.append("}).catch(e=>{document.getElementById('result').innerHTML='检查出错，请稍后再试';});");
-                html.append("}");
-                html.append("document.getElementById('word').addEventListener('keypress',function(e){if(e.key==='Enter')checkSpelling();});");
-                html.append("</script>");
+// 词典查询
+html.append("async function checkDictionary(){");
+html.append("var word=document.getElementById('word').value.trim().toLowerCase();");
+html.append("var resultDiv=document.getElementById('result');");
+html.append("if(!word){resultDiv.innerHTML='<div style=\"background:#f8f9fa;border-radius:10px;padding:15px;\">⚠️ 请输入单词</div>';return;}");
+html.append("resultDiv.innerHTML='<div style=\"background:#f8f9fa;border-radius:10px;padding:15px;\">📖 查询中...</div>';");
+html.append("try{");
+html.append("var response=await fetch('/dict?word='+encodeURIComponent(word));");
+html.append("var data=await response.json();");
+html.append("if(data.error){resultDiv.innerHTML='<div style=\"background:#f8f9fa;border-radius:10px;padding:15px;\">❌ '+data.error+'</div>';return;}");
+html.append("var html='<div style=\"background:#f8f9fa;border-radius:10px;padding:15px;\"><strong>📖 '+data.word+'</strong>';");
+html.append("if(data.phonetic)html+='<div style=\"margin-top:8px;color:#888;\">🔊 /'+data.phonetic+'/</div>';");
+html.append("if(data.meanings && data.meanings.length>0){");
+html.append("data.meanings.forEach(function(m){");
+html.append("html+='<div><span style=\"display:inline-block;background:#4CAF50;color:white;padding:3px 10px;border-radius:15px;font-size:0.85em;margin:10px 5px 0 0;\">'+m.partOfSpeech+'</span></div>';");
+html.append("m.definitions.forEach(function(def,idx){");
+html.append("html+='<div style=\"color:#555;margin-bottom:8px;padding-left:10px;border-left:3px solid #2196F3;\">'+(idx+1)+'. '+def.definition+'</div>';");
+html.append("if(def.example)html+='<div style=\"color:#888;font-style:italic;font-size:0.9em;margin-top:5px;padding-left:10px;\">📌 \"'+def.example+'\"</div>';");
+html.append("});");
+html.append("});");
+html.append("}else{");
+html.append("html+='<div style=\"margin-top:10px;\">✅ 拼写正确！</div>';");
+html.append("}");
+html.append("resultDiv.innerHTML=html+'</div>';");
+html.append("}catch(e){resultDiv.innerHTML='<div style=\"background:#f8f9fa;border-radius:10px;padding:15px;\">❌ 查询失败，请稍后再试</div>';}");
+html.append("}");
+html.append("}");
+html.append("document.getElementById('word').addEventListener('keypress',function(e){if(e.key==='Enter')checkDictionary();});");
+html.append("</script>");
                 
                 html.append("</body></html>");
                 
@@ -156,7 +172,73 @@ html.append("}");
                 exchange.close();
             }
         });
+        // 词典 API 端点（加在 server.start(); 之前）
+server.createContext("/dict", exchange -> {
+    try {
+        String query = exchange.getRequestURI().getQuery();
+        String word = "";
+        if (query != null && query.startsWith("word=")) {
+            word = URLDecoder.decode(query.substring(5), "UTF-8");
+        }
         
+        if (word.isEmpty()) {
+            String response = "{\"error\":\"请输入单词\"}";
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(400, response.length());
+            exchange.getResponseBody().write(response.getBytes());
+            exchange.close();
+            return;
+        }
+        
+        // 调用 Free Dictionary API
+        String apiUrl = "https://api.dictionaryapi.dev/api/v2/entries/en/" + URLEncoder.encode(word, "UTF-8");
+        HttpURLConnection conn = (HttpURLConnection) new URL(apiUrl).openConnection();
+        conn.setRequestMethod("GET");
+        conn.setRequestProperty("User-Agent", "TechNews/1.0");
+        conn.setConnectTimeout(10000);
+        conn.setReadTimeout(10000);
+        
+        int responseCode = conn.getResponseCode();
+        if (responseCode == 404) {
+            String response = "{\"error\":\"找不到单词 '" + word + "'，请检查拼写\"}";
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(404, response.length());
+            exchange.getResponseBody().write(response.getBytes());
+            exchange.close();
+            return;
+        }
+        
+        if (responseCode != 200) {
+            String response = "{\"error\":\"API 请求失败\"}";
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(500, response.length());
+            exchange.getResponseBody().write(response.getBytes());
+            exchange.close();
+            return;
+        }
+        
+        BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+        StringBuilder json = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            json.append(line);
+        }
+        reader.close();
+        
+        String formattedData = parseDictionaryJson(json.toString(), word);
+        
+        exchange.getResponseHeaders().set("Content-Type", "application/json");
+        exchange.sendResponseHeaders(200, formattedData.getBytes("UTF-8").length);
+        exchange.getResponseBody().write(formattedData.getBytes("UTF-8"));
+        exchange.close();
+    } catch (Exception e) {
+        String response = "{\"error\":\"服务器错误: " + e.getMessage() + "\"}";
+        exchange.getResponseHeaders().set("Content-Type", "application/json");
+        exchange.sendResponseHeaders(500, response.length());
+        exchange.getResponseBody().write(response.getBytes());
+        exchange.close();
+    }
+});
         server.start();
         System.out.println("TechNews 服务器已启动，端口: " + port);
     }
@@ -168,6 +250,64 @@ html.append("}");
         String kw = words.length>2 ? words[words.length/2] : "科技";
         return comments[new Random().nextInt(comments.length)].replace("{keyword}", kw);
     }
+    static String parseDictionaryJson(String jsonStr, String word) {
+    try {
+        com.google.gson.JsonArray arr = com.google.gson.JsonParser.parseString(jsonStr).getAsJsonArray();
+        if (arr.size() == 0) {
+            return "{\"error\":\"未找到定义\"}";
+        }
+        
+        com.google.gson.JsonObject firstEntry = arr.get(0).getAsJsonObject();
+        StringBuilder result = new StringBuilder();
+        result.append("{\"word\":\"").append(word).append("\",");
+        
+        if (firstEntry.has("phonetic") && !firstEntry.get("phonetic").isJsonNull()) {
+            result.append("\"phonetic\":\"").append(escapeJson(firstEntry.get("phonetic").getAsString())).append("\",");
+        } else {
+            result.append("\"phonetic\":\"\",");
+        }
+        
+        result.append("\"meanings\":[");
+        com.google.gson.JsonArray meanings = firstEntry.getAsJsonArray("meanings");
+        for (int i = 0; i < meanings.size(); i++) {
+            com.google.gson.JsonObject meaning = meanings.get(i).getAsJsonObject();
+            String partOfSpeech = meaning.get("partOfSpeech").getAsString();
+            
+            result.append("{\"partOfSpeech\":\"").append(partOfSpeech).append("\",");
+            result.append("\"definitions\":[");
+            
+            com.google.gson.JsonArray definitions = meaning.getAsJsonArray("definitions");
+            for (int j = 0; j < Math.min(definitions.size(), 3); j++) {
+                com.google.gson.JsonObject def = definitions.get(j).getAsJsonObject();
+                String definition = def.get("definition").getAsString();
+                result.append("{\"definition\":\"").append(escapeJson(definition)).append("\"");
+                
+                if (def.has("example") && !def.get("example").isJsonNull()) {
+                    String example = def.get("example").getAsString();
+                    result.append(",\"example\":\"").append(escapeJson(example)).append("\"");
+                }
+                result.append("}");
+                if (j < Math.min(definitions.size(), 3) - 1) result.append(",");
+            }
+            result.append("]}");
+            if (i < meanings.size() - 1) result.append(",");
+        }
+        result.append("]}");
+        
+        return result.toString();
+    } catch (Exception e) {
+        return "{\"error\":\"解析失败\"}";
+    }
+}
+
+static String escapeJson(String s) {
+    if (s == null) return "";
+    return s.replace("\\", "\\\\")
+            .replace("\"", "\\\"")
+            .replace("\n", "\\n")
+            .replace("\r", "\\r")
+            .replace("\t", "\\t");
+}
     
     // ==================== Guardian API ====================
     static List<NewsItem> fetchGuardian() throws Exception {

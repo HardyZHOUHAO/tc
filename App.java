@@ -123,7 +123,7 @@ public class App {
                 html.append("var audio = null;");
                 html.append("function toggleMusic(){");
                 html.append("if(!audio){");
-                html.append("audio = new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3');");
+                html.append("audio = new Audio('https://www.qtings.com/uploads/tracks/2124019576_786842529_1597766027.mp3');");
                 html.append("audio.loop = true;");
                 html.append("audio.play();");
                 html.append("document.getElementById('musicBtn').innerHTML = '⏸️ 暂停音乐';");
